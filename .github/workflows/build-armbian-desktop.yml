@@ -225,15 +225,6 @@ on:
         options:
           - desktop
           - server
-      builder_name:
-        description: "Set Armbian builder signature."
-        required: false
-        default: "ophub"
-        type: choice
-        options:
-          - ophub
-          - angel
-          - yourname
 
 env:
   TZ: America/New_York
@@ -349,7 +340,6 @@ jobs:
           kernel_usage: ${{ inputs.kernel_usage }}
           armbian_fstype: ${{ inputs.armbian_fstype }}
           armbian_size: ${{ inputs.armbian_size }}
-          builder_name: ${{ inputs.builder_name }}
 
       - name: Upload Rebuild image to Release
         uses: ncipollo/release-action@main
