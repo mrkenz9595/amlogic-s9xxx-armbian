@@ -241,6 +241,14 @@ init_var() {
                 error_msg "Invalid -s parameter [ ${2} ]!"
             fi
             ;;
+        -o | --OS)
+            if [[ -n "${2}" ]]; then
+                os_type="${2}"
+                shift
+            else
+                error_msg "Invalid -s parameter [ ${2} ]!"
+            fi
+            ;;
         -n | --BuilderName)
             if [[ -n "${2}" ]]; then
                 builder_name="${2// /}"

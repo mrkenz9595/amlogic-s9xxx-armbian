@@ -214,6 +214,18 @@ on:
         options:
           - save
           - temp
+      armbian_size:
+        description: "Set armbian rootfs size(Unit: MiB)."
+        required: false
+        default: "8192"
+      os_type:
+        description: "Set armbian OS type."
+        required: false
+        default: "desktop"
+        type: choice
+        options:
+          - desktop
+          - server
       builder_name:
         description: "Set Armbian builder signature."
         required: false
@@ -299,7 +311,7 @@ jobs:
                            BUILD_ONLY=default HOST=armbian BUILD_DESKTOP=yes EXPERT=yes KERNEL_CONFIGURE=no \
                            DESKTOP_ENVIRONMENT=xfce DESKTOP_ENVIRONMENT_CONFIG_NAME=config_base \
                            DESKTOP_APPGROUPS_SELECTED="browsers, desktop_tools, editor, internet, multimedia, programming" \
-                           EXTRAWIFI=yes INSTALL_HEADERS=no BSPFREEZE=yes \
+                           EXTRAWIFI=yes INSTALL_HEADERS=yes BSPFREEZE=yes \
                            COMPRESS_OUTPUTIMAGE="sha" SHARE_LOG=yes
           echo "status=success" >> ${GITHUB_OUTPUT}
 
@@ -337,6 +349,7 @@ jobs:
           kernel_repo: ${{ inputs.kernel_repo }}
           kernel_usage: ${{ inputs.kernel_usage }}
           armbian_fstype: ${{ inputs.armbian_fstype }}
+          armbian_size: ${{ inputs.armbian_size }}
           builder_name: ${{ inputs.builder_name }}
 
       - name: Upload Rebuild image to Release
