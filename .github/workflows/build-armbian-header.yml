@@ -17,6 +17,7 @@ on:
         options:
           - jammy
           - noble
+          - plucky
           - bookworm
           - bullseye
       armbian_board:
