@@ -1467,6 +1467,29 @@ dd if=/dev/mmcblk2 of=env.bin bs=1M count=8 skip=628
 ```
 Place the backed-up files in the corresponding directory of the [u-boot](https://github.com/ophub/u-boot) repository: [u-boot/amlogic/bootloader/a311d-oes](https://github.com/ophub/u-boot/tree/main/u-boot/amlogic/bootloader/a311d-oes).
 
+You might have noticed that the reserved partition is 64MB in size, so why did we only back up 8MB? This is because on the oes(a311d) device, only the first 8MB of the reserved partition contains critical data; the subsequent 56MB is empty and does not need to be backed up. Here is how you can verify this:
+
+```shell
+# First, back up the complete 64MB file of the reserved partition:
+dd if=/dev/mmcblk2 of=reserved_64M.bin bs=1M count=64 skip=36
+
+# Then, extract the first 8MB from the backed-up file reserved_64M.bin:
+dd if=reserved_64M.bin of=reserved_first_8M.bin bs=1M count=8
+
+# Next, check the hexadecimal contents:
+hexdump -C reserved_first_8M.bin | less
+
+# Now, examine the last few lines of the output:
+0071ffd0  4c 5e a8 1f fc 5b 5b 98  ae ef b0 97 0c 3b e8 c2  |L^...[[......;..|
+0071ffe0  c8 e0 b2 74 3d 67 d5 3d  24 7b 63 b7 c7 73 f5 d8  |...t=g.=${c..s..|
+0071fff0  a1 b8 38 a7 57 d6 b4 b5  e8 1c ba c0 07 0f f5 79  |..8.W..........y|
+00720000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+00800000
+```
+
+Analyzing the output, the address of the last line containing non-zero data is `0071fff0`. Starting from address `00720000`, all content is `00` (zero). The hexdump utility uses an asterisk (`*`) to indicate repeated lines, meaning everything from `00720000` to the end of the file at `00800000` (the 8MB mark) is zero. Converting the address `0x00720000` to decimal gives us `7,471,104` bytes, which is `7,471,104 / 1024 / 1024 = 7.125 MB`. Therefore, rounding up to 8MB for the backup is sufficient. Similarly, for the env partition, only the first 1MB contains valid data, and the rest is blank. However, since the partition is small, we backed up the entire 8MB for simplicity.
+
 ##### 12.15.3.3 Add a Special Partition Writing File
 
 For specific implementation details, refer to the `write_board_bootloader` function defined in the file [/etc/armbian-board-release.conf](https://github.com/ophub/amlogic-s9xxx-armbian/blob/main/build-armbian/armbian-files/different-files/a311d-oes/rootfs/etc/armbian-board-release.conf). This function is called during the image rebuild process. Additionally, this configuration file serves as a powerful device customization hub. You can not only precisely control the layout and size of image partitions using parameters like `skip_mb="700"`, but also add custom scripts to perform special operations on the kernel or other system files. In the future, all advanced, device-specific customizations will be centrally managed in this file to ensure clear, efficient, and convenient configuration.
